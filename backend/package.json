@@ -1,0 +1,38 @@
+{
+    "name": "ict-acr-api",
+    "version": "1.0.0",
+    "description": "ICT ACR api",
+    "main": "src/index.js",
+    "scripts": {
+      "start": "NODE_ENV=production nodemon src/index.js",
+      "dev": "NODE_ENV=development nodemon src/index.js",
+      "socket": "NODE_ENV=production nodemon src/socket.js",
+      "soc_dev": "NODE_ENV=development nodemon src/socket.js"
+    },
+    "author": "inflack",
+    "license": "ISC",
+    "dependencies": {
+      "@joi/date": "^2.1.0",
+      "axios": "^1.4.0",
+      "bcrypt": "^5.1.0",
+      "cors": "^2.8.5",
+      "dotenv": "^16.0.3",
+      "express": "^4.18.2",
+      "express-http-proxy": "^1.6.3",
+      "express-jwt": "^8.4.1",
+      "joi": "^17.9.2",
+      "jsonwebtoken": "^9.0.0",
+      "moment": "^2.29.4",
+      "mysql": "^2.18.1",
+      "mysql2": "^3.3.3",
+      "nodemailer": "^6.9.3",
+      "sequelize": "^6.32.0",
+      "socket.io": "^4.5.1",
+      "socket.io-client": "^4.5.1"
+    },
+    "devDependencies": {
+      "nodemon": "^2.0.22",
+      "sequelize-cli": "^6.6.1"
+    }
+  }
+  
