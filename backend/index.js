@@ -53,10 +53,10 @@ const io = new Server(server,{
 let likes = 0;
 
 
-setInterval(()=>{
-	likes++;
-	eventEmitter.emit("newdata");
-}, 2000);
+//setInterval(()=>{
+	//likes++;
+	//eventEmitter.emit("newdata");
+//}, 2000);
 let user_socketId = []
 
 io.on("connection",async (socket) => {
@@ -70,9 +70,9 @@ io.on("connection",async (socket) => {
 		socket.broadcast.emit('likeupdate', likes) 
 	})
 
-    eventEmitter.on('newdata', async ()=>{
-		socket.broadcast.emit('likeupdate', likes) 
-	})
+    // eventEmitter.on('newdata', async ()=>{
+	// 	socket.broadcast.emit('likeupdate', likes) 
+	// })
 
     socket.on('custom-event', (number, string, obj)=>{
         console.log(number, string, obj)
@@ -97,26 +97,37 @@ io.on("connection",async (socket) => {
     
 
     //socket vue page
-    socket.on("user-connected", (user_id,room) =>{
+    socket.on("user-connected", async (user_id,room, cb) =>{
         if(user_id != ''){
             socket.emit('getMessage', room)
         }
+        const data = await Notification.findAll({where:{userId: user_id}})
+        cb(data)
     })
     
     socket.emit('current_user', user_socketId)
 
-    let noti =await Notification.findAll()
-    socket.emit('notification', noti)
+
 
     eventEmitter.on('new_notification', async ()=>{
         let noti =await Notification.findAll()
         socket.emit('notification', noti)
     })
 
-    
-    
+    socket.on('disconnect',()=>{
+        console.log("discconected "+socket.id)
+        const index = user_socketId.indexOf(socket.id)
+        if(index != -1){
+            user_socketId.splice(index)
+        }
+    })
+
+    socket.on('user_remove', user_id =>{
+        console.log(user_id)
+        user_socketId.pop(user_id)
+    })
 });
 
 server.listen(8000, () => {
-    console.log(`getWay is running on port 8000`)
+    console.log(`=============> Server running on port 8000`)
 })

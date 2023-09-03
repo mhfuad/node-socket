@@ -38,35 +38,29 @@ export default {
   },
   methods: {
     clicked(){
-      this.socket.emit('liked');
+      this.$socket.emit('liked');
     },
     custom(){
-      this.socket.emit('custom-event', 10, 'h1', {a: 'a'})
+      this.$socket.emit('custom-event', 10, 'h1', {a: 'a'})
     },
     message(){
-      this.socket.emit('send-message', this.text)
+      this.$socket.emit('send-message', this.text)
       this.text = '';
     },
     toUser(){
-      this.socket.emit('send_to', this.text2, this.room)
+      this.$socket.emit('send_to', this.text2, this.room)
       this.text2 = '',
       this.room = ''
     }
   },
   mounted(){
-    this.socket = io('http://127.0.0.1:8000');
-    
-    this.socket.on("connect", ()=>{
-      this.socket_id = this.socket.id
-    })
-    
-    this.socket.on("likeupdate", (count) => {
+    this.$socket.on("likeupdate", (count) => {
         this.count = count;
     })
-    this.socket.on('receive-message', (bal) => {
+    this.$socket.on('receive-message', (bal) => {
       this.message_test += bal
     })
-    this.socket.on('user_message', (message)=>{
+    this.$socket.on('user_message', (message)=>{
       this.user_message += message;
     })
   }
