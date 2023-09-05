@@ -63,6 +63,9 @@ export default {
     this.$socket.on('user_message', (message)=>{
       this.user_message += message;
     })
+    this.$socket.on('notification', (message)=>{
+      console.log(message)
+    })
   }
 }
 </script>

@@ -23,6 +23,9 @@ const Notification = sequelize.define('Notification', {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    view: {
+        type: DataTypes.BOOLEAN
+    },
     notification: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -43,6 +46,17 @@ app.post('/', async (req, res) => {
     }
 });
 
+app.get('/notification/:user_id', async (req, res) => {
+    const not = await Notification.findAll({where:{userId: req.params.user_id}})
+    res.status(201).json(not);
+})
+
+app.put('/notification/:id', async (req, res) => {
+    const not = await Notification.update({view:true},{where:{id: req.params.id}})
+    res.status(201).json(not);
+})
+
+
 //socket
 const io = new Server(server,{
 	cors: {
@@ -51,12 +65,7 @@ const io = new Server(server,{
 });
 
 let likes = 0;
-
-
-//setInterval(()=>{
-	//likes++;
-	//eventEmitter.emit("newdata");
-//}, 2000);
+let users = [];
 let user_socketId = []
 
 io.on("connection",async (socket) => {
@@ -69,10 +78,6 @@ io.on("connection",async (socket) => {
 		socket.emit('likeupdate', likes);
 		socket.broadcast.emit('likeupdate', likes) 
 	})
-
-    // eventEmitter.on('newdata', async ()=>{
-	// 	socket.broadcast.emit('likeupdate', likes) 
-	// })
 
     socket.on('custom-event', (number, string, obj)=>{
         console.log(number, string, obj)
@@ -91,23 +96,15 @@ io.on("connection",async (socket) => {
             socket.to(room).emit('user_message', message)
         }
     })
-    
-    
-
-    
-
+    //************************ */
     //socket vue page
-    socket.on("user-connected", async (user_id,room, cb) =>{
-        if(user_id != ''){
-            socket.emit('getMessage', room)
-        }
-        const data = await Notification.findAll({where:{userId: user_id}})
-        cb(data)
+    socket.on("user-connected", async (user_id) =>{
+        const data = await Notification.count({where:{userId: user_id}})
+        socket.emit('getMessage', data)
+        //cb(data)
     })
     
     socket.emit('current_user', user_socketId)
-
-
 
     eventEmitter.on('new_notification', async ()=>{
         let noti =await Notification.findAll()
@@ -128,6 +125,6 @@ io.on("connection",async (socket) => {
     })
 });
 
-server.listen(8000, () => {
-    console.log(`=============> Server running on port 8000`)
+server.listen(8001, () => {
+    console.log(`=============> Server running on port 8001`)
 })

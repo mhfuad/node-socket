@@ -9,15 +9,18 @@
         <li v-for="item in current_user" :key="item">{{ item }}</li>
       </ul>
       <h3>Notifications</h3>
+      
+      <button @click="getNotificationList()">{{ notifications_count }}</button><br />
       <ul>
-        <li v-for="item in notifications" :key="item">{{ item.userId }} => {{ item.notification }}</li>
+        <li v-for="item in notifications" :key="item.id" @click="updateNotification(item.id)">{{ item.userId }} => {{ item.notification }}</li>
       </ul>
     </div>
   </template>
   
   <script>
-  // @ is an alias to /src
+  import axio from "axios";
   export default {
+    
     name: 'SocketView',
     data(){
       return {
@@ -25,16 +28,31 @@
         socket_id:'',
         user_id:'',
         current_user: '',
-
+        notifications_count: 0,
         notifications: {}
       }
     },
     methods: {
       join_custom_room(){
-        this.$socket.emit('user-connected', this.user_id, this.$socket_id, data => {
-          this.notifications = data;
-        })
+        this.$socket.emit('user-connected', this.user_id)
+        localStorage.setItem('user_id',this.user_id)
         this.user_id = '';
+      },
+      getNotificationList(){
+        this.notifications_count = 0
+        const user_id = localStorage.getItem('user_id')
+        axio.get("http://localhost:8001/notification/"+user_id)
+        .then((res)=>{
+          this.notifications = res.data
+        })
+        .catch()
+      },
+      updateNotification(id){
+        axio.put("http://localhost:8001/notification/"+id)
+        .then((res)=>{
+          console.log(res)
+        })
+        .catch()
       }
     },
     mounted(){
@@ -44,13 +62,13 @@
       })
 
       this.$socket.on("getMessage", (res) => {
-        console.log({getMessage: res})
+        this.notifications_count = res
       })
 
-      // this.$socket.on('reconnect', ()=>{
+      this.$socket.on('reconnect', ()=>{
       //   this.current_user.pop(this.socket_id)
       //   this.socket_id = this.socket.id
-      // })
+      })
       //console.log(this.$socket_id)
     }
   }
