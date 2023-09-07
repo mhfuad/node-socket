@@ -1,6 +1,7 @@
 <template>
     <div class="about">
-      <h3 >User id: {{ user_id }}</h3>
+    
+      <h3>User id: {{ user_id }}</h3>
       <input type="text" v-model="user_id" placeholder="user id">
       <button @click="join_custom_room">join</button>
 
@@ -35,12 +36,12 @@
     methods: {
       join_custom_room(){
         this.$socket.emit('user-connected', this.user_id)
-        localStorage.setItem('user_id',this.user_id)
+        localStorage.setItem("user_id", this.user_id)
         //this.user_id = '';
       },
       getNotificationList(){
         this.notifications_count = 0
-        const user_id = localStorage.getItem('user_id')
+        const user_id = localStorage.getItem("user_id")
         axio.get("http://localhost:8001/notification/"+user_id)
         .then((res)=>{
           this.notifications = res.data
@@ -65,6 +66,18 @@
         this.notifications_count = res
       })
 
+      this.$socket.on('custom-event-test', (res)=>{
+        alert(res)
+      })
+    },
+    beforeCreate(){
+      localStorage.removeItem("user_id");
+    },
+    unmounted(){
+      localStorage.removeItem("user_id");
+    },
+    destroyed(){
+      localStorage.removeItem("user_id");
     }
   }
   </script>

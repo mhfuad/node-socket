@@ -4,6 +4,7 @@ const { Server } = require('socket.io');
 const events = require('events')
 const cors = require('cors')
 const { DataTypes,Sequelize } = require('sequelize');
+const { test } = require('./ulala')
 
 const app = express();
 const server = http.createServer(app);
@@ -48,11 +49,14 @@ app.post('/', async (req, res) => {
 
 app.get('/notification/:user_id', async (req, res) => {
     const not = await Notification.findAll({where:{userId: req.params.user_id}})
+    eventEmitter.emit("event-emiter", );
     res.status(201).json(not);
 })
 
 app.put('/notification/:id', async (req, res) => {
     const not = await Notification.update({view:true},{where:{id: req.params.id}})
+    test(eventEmitter);
+    //eventEmitter.emit("event-emiter", );
     res.status(201).json(not);
 })
 
@@ -102,7 +106,8 @@ io.on("connection",async (socket) => {
     socket.on("user-connected", async (user_id) =>{
         const data = await Notification.count({where:{userId: user_id}})
         socket.emit('getNotificationCount', data)
-        users.set(socket.id, user_id)
+        users.set(user_id, socket.id)
+        socket.user_id = user_id;
         //cb(data)
         socket.emit('current_user', Array.from(users) )
         socket.broadcast.emit('current_user', Array.from(users) )
@@ -118,7 +123,7 @@ io.on("connection",async (socket) => {
     socket.on('disconnect',()=>{
         console.log({Discconected : socket.id})
         
-        users.delete(socket.id)
+        users.delete(socket.user_id)
         socket.emit('current_user', Array.from(users) )
         socket.broadcast.emit('current_user', Array.from(users) )
     })
@@ -127,7 +132,27 @@ io.on("connection",async (socket) => {
         console.log(user_id)
         user_socketId.pop(user_id)
     })
+
+    
 });
+
+eventEmitter.on("event-emiter", ()=>{
+    console.log('custom-event-test'+"test")
+    //console.log(io.sockets.adapter)
+    //socket.broadcast.emit('custom-event-test', "test")
+})
+
+// const test = (type, data) => {
+//     if(type == all){
+
+//     }else if( type == "single"){
+//         const socketUser = users.get(data.user_id)
+//         socketUser.emit()
+//     }
+// }
+
+
+
 
 server.listen(8001, () => {
     console.log(`=============> Server running on port 8001`)
