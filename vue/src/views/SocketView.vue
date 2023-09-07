@@ -1,6 +1,6 @@
 <template>
     <div class="about">
-      <h3 >socket id: {{ $socket_id }}</h3>
+      <h3 >User id: {{ user_id }}</h3>
       <input type="text" v-model="user_id" placeholder="user id">
       <button @click="join_custom_room">join</button>
 
@@ -36,7 +36,7 @@
       join_custom_room(){
         this.$socket.emit('user-connected', this.user_id)
         localStorage.setItem('user_id',this.user_id)
-        this.user_id = '';
+        //this.user_id = '';
       },
       getNotificationList(){
         this.notifications_count = 0
@@ -50,7 +50,7 @@
       updateNotification(id){
         axio.put("http://localhost:8001/notification/"+id)
         .then((res)=>{
-          console.log(res)
+          //console.log(res)
         })
         .catch()
       }
@@ -61,15 +61,10 @@
         this.current_user = ress
       })
 
-      this.$socket.on("getMessage", (res) => {
+      this.$socket.on("getNotificationCount", (res) => {
         this.notifications_count = res
       })
 
-      this.$socket.on('reconnect', ()=>{
-      //   this.current_user.pop(this.socket_id)
-      //   this.socket_id = this.socket.id
-      })
-      //console.log(this.$socket_id)
     }
   }
   </script>

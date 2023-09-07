@@ -65,11 +65,12 @@ const io = new Server(server,{
 });
 
 let likes = 0;
-let users = [];
+let users = new Map();
 let user_socketId = []
 
 io.on("connection",async (socket) => {
-    user_socketId.push(socket.id)
+    console.log({Conected :socket.id})
+    
     //about vue
 	socket.emit('likeupdate', likes);
 
@@ -100,11 +101,14 @@ io.on("connection",async (socket) => {
     //socket vue page
     socket.on("user-connected", async (user_id) =>{
         const data = await Notification.count({where:{userId: user_id}})
-        socket.emit('getMessage', data)
+        socket.emit('getNotificationCount', data)
+        users.set(socket.id, user_id)
         //cb(data)
+        socket.emit('current_user', Array.from(users) )
+        socket.broadcast.emit('current_user', Array.from(users) )
     })
     
-    socket.emit('current_user', user_socketId)
+    socket.emit('current_user', Array.from(users) )
 
     eventEmitter.on('new_notification', async ()=>{
         let noti =await Notification.findAll()
@@ -112,11 +116,11 @@ io.on("connection",async (socket) => {
     })
 
     socket.on('disconnect',()=>{
-        console.log("discconected "+socket.id)
-        const index = user_socketId.indexOf(socket.id)
-        if(index != -1){
-            user_socketId.splice(index)
-        }
+        console.log({Discconected : socket.id})
+        
+        users.delete(socket.id)
+        socket.emit('current_user', Array.from(users) )
+        socket.broadcast.emit('current_user', Array.from(users) )
     })
 
     socket.on('user_remove', user_id =>{
